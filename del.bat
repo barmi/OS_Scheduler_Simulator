@@ -1,3 +1,6 @@
+REM clean immediate files
+REM skshin 2012.07.24
+
 del /S /Q *.sdf *.exp *.ilk *.pdb
 rd /S /Q ipch
 cd OS_Scheduler_Simulator
