@@ -64,6 +64,11 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;
 }
 
+#define RGB_BLACK	RGB(0,0,0)
+#define RGB_RED		RGB(255,0,0)
+#define RGB_GREEN	RGB(0,255,0)
+#define RGB_BLUE	RGB(0,0,255)
+
 void CChildView::OnPaint() 
 {
 	int screen_start_x = 5;
@@ -84,9 +89,9 @@ void CChildView::OnPaint()
 	CPen redPen(PS_SOLID, 1, RGB(255,0,0));
 	CPen *oldPen = dc.SelectObject(&blackPen);
 
-	CBrush redBrush(RGB(255, 0, 0));
-	CBrush greenBrush(RGB(0, 255, 0));
-	CBrush blackBrush(RGB(0, 0, 0));
+	CBrush redBrush(RGB_RED);
+	CBrush greenBrush(RGB_GREEN);
+	CBrush blackBrush(RGB_BLACK);
 	CBrush *oldBrush = dc.SelectObject(&blackBrush);
 
 
@@ -111,12 +116,12 @@ void CChildView::OnPaint()
 		if (i == m_datafile_index)
 		{
 			if (m_keymode == KM_DATAFILE)
-				dc.SetTextColor(RGB(255, 0, 0));
+				dc.SetTextColor(RGB_RED);
 			else
-				dc.SetTextColor(RGB(0, 0, 255));
+				dc.SetTextColor(RGB_BLUE);
 		}
 		else
-			dc.SetTextColor(RGB(0,0,0));
+			dc.SetTextColor(RGB_BLACK);
 		dc.TextOut(screen_cur_x, screen_cur_y, str);
 		screen_cur_x += dc.GetTextExtent(str).cx + 10;
 	}
@@ -124,6 +129,7 @@ void CChildView::OnPaint()
 
 	// Algorithm
 	screen_cur_x = screen_start_x;
+	dc.SetTextColor(RGB_BLACK);
 	str = L"Algorithm : ";
 	dc.TextOut(screen_cur_x, screen_cur_y, str);
 	screen_cur_x += dc.GetTextExtent(str).cx;
@@ -137,9 +143,9 @@ void CChildView::OnPaint()
 		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, algo_name, strlen(algo_name), walgo_name, 32);
 		
 		if (m_system->algorithm == it->algorithm)
-			dc.SetTextColor(RGB(255,0,0));
+			dc.SetTextColor( (m_keymode == KM_ALGO) ? RGB_RED : RGB_BLUE);
 		else
-			dc.SetTextColor(RGB(0,0,0));
+			dc.SetTextColor(RGB_BLACK);
 
 		str.Format(L"%d: %s", it->algorithm, walgo_name);
 		dc.TextOut(screen_cur_x, screen_cur_y, str);
@@ -149,10 +155,12 @@ void CChildView::OnPaint()
 
 	// Quantum
 	screen_cur_x = screen_start_x;
+	dc.SetTextColor(RGB_BLACK);
 	str = L"Quantum : ";
 	dc.TextOut(screen_cur_x, screen_cur_y, str);
 	screen_cur_x += dc.GetTextExtent(str).cx;
 
+	dc.SetTextColor( (m_keymode == KM_QUANTUM) ? RGB_RED : RGB_BLUE );
 	str.Format(L"%d", m_system->quantum);
 	dc.TextOut(screen_cur_x, screen_cur_y, str);
 
@@ -160,10 +168,12 @@ void CChildView::OnPaint()
 
 	// Current Time
 	screen_cur_x = screen_start_x;
+	dc.SetTextColor(RGB_BLACK);
 	str = L"Current Time : ";
 	dc.TextOut(screen_cur_x, screen_cur_y, str);
 	screen_cur_x += dc.GetTextExtent(str).cx;
 
+	dc.SetTextColor( (m_keymode == KM_SIMUL) ? RGB_RED : RGB_BLUE );
 	str.Format(L"%d", m_system->cur_time);
 	dc.TextOut(screen_cur_x, screen_cur_y, str);
 
@@ -267,42 +277,103 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	case VK_LEFT:
 		{
+			switch (m_keymode)
+			{
+			case KM_DATAFILE:
+				{
+					if (--m_datafile_index < 0)
+						m_datafile_index = (int)m_datafile_list.size()-1;
+				}
+				break;
+			case KM_ALGO:
+				{
+					// system의 algorithm을 선택
+					if (m_system->cur_time < 0)
+					{
+						if (--m_system->algorithm < 0)
+							m_system->algorithm = (int)m_algo_item_list.size()-1;
+					}
+				}
+				break;
+			case KM_QUANTUM:
+				{
+					if (m_system->quantum > 0)
+						--m_system->quantum;
+				}
+				break;
+			case KM_SIMUL:
+				{
+				}
+				break;
+			}
+			Invalidate();
 		}
 		break;
 	case VK_RIGHT:
 		{
-			// 시스템 구동 전이면, 시스템 구동에 대한 준비를 시작한다.
-			if (m_system->cur_time < 0)
+			switch (m_keymode)
 			{
-				m_system->cur_time = 0;
+			case KM_DATAFILE:
+				{
+					if (++m_datafile_index >= (int)m_datafile_list.size())
+						m_datafile_index = 0;
+				}
+				break;
+			case KM_ALGO:
+				{
+					// system의 algorithm을 선택
+					if (m_system->cur_time < 0)
+					{
+						if (++m_system->algorithm >= int(m_algo_item_list.size()))
+							m_system->algorithm = 0;
+					}
+				}
+				break;
+			case KM_QUANTUM:
+				{
+					++m_system->quantum;
+				}
+				break;
+			case KM_SIMUL:
+				{
+					//=====================================================================
+					// 시스템 시각을 증가 시킨다.
+					++m_system->cur_time;
+					// 알고리즘을 호출하기 전에, 도착한 PCB가 있으면 ready큐로 옮겨 놓는다.
+					system_switch_work_to_ready(m_system);
+					// 알고리즘을 수행한다.
+					m_algo_item_list[m_system->algorithm].fp_get_next_process(m_system);
+					// 알고리즘을 수행한 후, 후처리를 한다.
+					system_update_after_algorithm(m_system);
+					//=====================================================================
+				}
+				break;
 			}
-			else
-			{
-				++m_system->cur_time;
-			}
-
-			//=====================================================================
-			// 알고리즘을 호출하기 전에, 도착한 PCB가 있으면 ready큐로 옮겨 놓는다.
-			system_switch_work_to_ready(m_system);
-			// 알고리즘을 수행한다.
-			m_algo_item_list[m_system->algorithm].fp_get_next_process(m_system);
-			// 알고리즘을 수행한 후, 후처리를 한다.
-			system_update_after_algorithm(m_system);
-			//=====================================================================
-
-			//system_debug_status(m_system);
 
 			Invalidate();
 		}
 		break;
 	case VK_UP:
 		{
+			if (--m_keymode < KM_BEGIN)
+				m_keymode = KM_LAST-1;
+			Invalidate();
 		}
 		break;
 	case VK_DOWN:
 		{
 			if (++m_keymode == KM_LAST)
 				m_keymode = KM_BEGIN;
+			Invalidate();
+		}
+		break;
+	case VK_RETURN:
+		{
+			if (m_keymode == KM_DATAFILE)
+			{
+				LoadDataFile(m_datafile_index);
+				Invalidate();
+			}
 		}
 		break;
 	}

@@ -15,7 +15,7 @@
 #define KM_ALGO		2
 #define KM_QUANTUM	3
 #define KM_SIMUL	4
-#define KM_LAST		4
+#define KM_LAST		5
 
 class CChildView : public CWnd
 {
