@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OS_Scheduler_Simulator", "OS_Scheduler_Simulator\OS_Scheduler_Simulator.vcxproj", "{1F3389F3-A8EC-4778-8FA9-FC87345BF57B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_fcfs", "algo_fcfs\algo_fcfs.vcxproj", "{D6CEDA9A-A9B8-493A-85D1-D679247C9319}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_rr", "algo_rr\algo_rr.vcxproj", "{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1F3389F3-A8EC-4778-8FA9-FC87345BF57B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1F3389F3-A8EC-4778-8FA9-FC87345BF57B}.Debug|Win32.Build.0 = Debug|Win32
+		{1F3389F3-A8EC-4778-8FA9-FC87345BF57B}.Release|Win32.ActiveCfg = Release|Win32
+		{1F3389F3-A8EC-4778-8FA9-FC87345BF57B}.Release|Win32.Build.0 = Release|Win32
+		{D6CEDA9A-A9B8-493A-85D1-D679247C9319}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D6CEDA9A-A9B8-493A-85D1-D679247C9319}.Debug|Win32.Build.0 = Debug|Win32
+		{D6CEDA9A-A9B8-493A-85D1-D679247C9319}.Release|Win32.ActiveCfg = Release|Win32
+		{D6CEDA9A-A9B8-493A-85D1-D679247C9319}.Release|Win32.Build.0 = Release|Win32
+		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Debug|Win32.Build.0 = Debug|Win32
+		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Release|Win32.ActiveCfg = Release|Win32
+		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
