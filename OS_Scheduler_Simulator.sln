@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_fcfs", "algo_fcfs\algo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_rr", "algo_rr\algo_rr.vcxproj", "{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "algo_sjf", "algo_sjf\algo_sjf.vcxproj", "{04701F51-1EF4-47AE-9295-A464FB3F768D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -25,6 +27,10 @@ Global
 		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Debug|Win32.Build.0 = Debug|Win32
 		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Release|Win32.ActiveCfg = Release|Win32
 		{B367A99B-E15B-4ED6-BFA7-A5C05B50592D}.Release|Win32.Build.0 = Release|Win32
+		{04701F51-1EF4-47AE-9295-A464FB3F768D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{04701F51-1EF4-47AE-9295-A464FB3F768D}.Debug|Win32.Build.0 = Debug|Win32
+		{04701F51-1EF4-47AE-9295-A464FB3F768D}.Release|Win32.ActiveCfg = Release|Win32
+		{04701F51-1EF4-47AE-9295-A464FB3F768D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
