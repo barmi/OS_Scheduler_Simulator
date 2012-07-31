@@ -1,39 +1,40 @@
-// algo_sjf.cpp : DLL 응용 프로그램을 위해 내보낸 함수를 정의합니다.
+// algo_srtf.cpp : DLL 응용 프로그램을 위해 내보낸 함수를 정의합니다.
 //
 
 #include "stdafx.h"
 #pragma warning(disable : 4996)
-#include "algo_sjf.h"
+#include "algo_srtf.h"
 #include <stdio.h>
 #include <string.h>
 
 /*
 // 내보낸 변수의 예제입니다.
-ALGO_SJF_API int nalgo_sjf=0;
+ALGO_SRTF_API int nalgo_srtf=0;
 
 // 내보낸 함수의 예제입니다.
-ALGO_SJF_API int fnalgo_sjf(void)
+ALGO_SRTF_API int fnalgo_srtf(void)
 {
 	return 42;
 }
 
 // 내보낸 클래스의 생성자입니다.
-// 클래스 정의를 보려면 algo_sjf.h를 참조하십시오.
-Calgo_sjf::Calgo_sjf()
+// 클래스 정의를 보려면 algo_srtf.h를 참조하십시오.
+Calgo_srtf::Calgo_srtf()
 {
 	return;
 }
 */
 
-ALGO_SJF_API int lib_get_algorithm_name(char* str_name_buf)
+
+ALGO_SRTF_API int lib_get_algorithm_name(char* str_name_buf)
 {
-	int size = sprintf(str_name_buf, "SJF(비선점)");
+	int size = sprintf(str_name_buf, "SJF(선점-SRTF)");
 	return size;
 }
 
 static sys_util_t sys_util;
 
-ALGO_SJF_API int lib_init_sys_util(sys_util_t* sutil)
+ALGO_SRTF_API int lib_init_sys_util(sys_util_t* sutil)
 {
 	memcpy(&sys_util, sutil, sizeof(sys_util_t));
 
@@ -47,7 +48,7 @@ static pcb_t* get_shortest_job(system_t* system)
 
 	while(pcb)
 	{
-		if (pcb_sj->burst_time > pcb->burst_time)
+		if ((pcb_sj->burst_time-pcb_sj->consume_time) > (pcb->burst_time-pcb->consume_time))
 		{
 			pcb_sj = pcb;
 		}
@@ -67,7 +68,7 @@ static pcb_t* get_shortest_job(system_t* system)
 				- "-1" 값이면, 할당되지 않고 IDLE상태임
 				- CPU개수는 system.cpu_count에 있지만, 현재는 무조건 1이라, 0번 index만 사용
 */
-ALGO_SJF_API int lib_get_next_process(system_t* system)
+ALGO_SRTF_API int lib_get_next_process(system_t* system)
 {
 	// 현재 시스템.CPU에 할당된 프로세스가 있으면, 그 프로세스의 burst_time과 consume_time을 비교한다.
 	// burst_time > consume_time인 동안은 계속해서 현재 할당된 프로세스가 동작한다.
@@ -81,20 +82,14 @@ ALGO_SJF_API int lib_get_next_process(system_t* system)
 			// 그 다음에는 ready큐에 있는 pcb를 CPU에 할당한다. (Shortest job을 찾아서 할당한다.)
 			system->pcb_on_cpu[0] = get_shortest_job(system);
 		}
-		/*
 		else if (system->pcb_on_cpu[0]->consume_time_cur == system->quantum)
 		{
-			// 현재 할당된 pcb가 quantum 만큼을 소모했다면, 다음 pcb에게 CPU를 할당한다.
-			if (system->pcb_on_cpu[0]->next)
-			{
-				system->pcb_on_cpu[0] = system->pcb_on_cpu[0]->next;
-			}
-			else
-			{
-				system->pcb_on_cpu[0] = system->ready_queue->head;
-			}
+			// 현재 할당된 pcb가 quantum 만큼을 소모했다면, 다음으로 job이 적게 남은 pcb에게 CPU를 할당한다.
+			system->pcb_on_cpu[0] = get_shortest_job(system);
+			/* context switching이 일어나지 않을 수도 있다. 
+			현재 진행 중이던 pcb가 다른 pcb보다 작업이 적게 남아 있으면 계속 수행하기 때문이다.
+			*/
 		}
-		*/
 	}
 	else
 	{
