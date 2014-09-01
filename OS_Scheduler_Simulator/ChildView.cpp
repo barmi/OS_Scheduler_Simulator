@@ -16,6 +16,7 @@
 #define new DEBUG_NEW
 #endif
 
+#define BUFSIZE MAX_PATH
 
 // CChildView
 
@@ -275,6 +276,58 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			Invalidate();
 		}
 		break;
+	case 'P':
+		{
+			// terminated queue에 있는 pcb 상태 Print
+			OutputDebugString(L"pid  burst priority  arrival  start  finish   wait  response  turnaround\n");
+			TCHAR str[256];
+
+			pcb_t* pcb = m_system->terminate_queue->head;
+			while(pcb)
+			{
+				wsprintf(str, L"%3d %3d %3d %3d %3d %3d %3d %3d %3d\n", 
+					pcb->pid, pcb->burst_time, pcb->priority, pcb->arrival_time, pcb->start_time, pcb->finish_time, pcb->wait_time, pcb->start_time-pcb->arrival_time, pcb->finish_time-pcb->arrival_time+1);
+				OutputDebugString(str);
+
+				pcb = pcb->next;
+			}
+		}
+		break;
+	case 'E':
+		{
+			// terminated queue에 있는 pcb 상태 Export
+			CTime time = CTime::GetCurrentTime();
+
+			TCHAR buf[BUFSIZE];
+			TCHAR filename[BUFSIZE];
+			DWORD dwRet;
+
+			dwRet = GetModuleFileName(AfxGetApp()->m_hInstance, buf, BUFSIZE);
+			PathRemoveFileSpec(buf);
+
+			StringCchCat(buf, BUFSIZE, L"\\");
+			wsprintf(filename, L"%04d%02d%02d_%02d%02d%02d.csv", time.GetYear(), time.GetMonth(), time.GetDay()
+				, time.GetHour(), time.GetMinute(), time.GetSecond());
+			StringCchCat(buf, BUFSIZE, filename);
+
+			FILE* fp;
+			fp = _wfopen(buf, L"wt");
+			if (fp == NULL)
+				break;
+
+			fwprintf(fp, L"pid,burst,priority,arrival,start,finish,wait,response,turnaround\n");
+
+			pcb_t* pcb = m_system->terminate_queue->head;
+			while(pcb)
+			{
+				fwprintf(fp, L"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d\n", 
+					pcb->pid, pcb->burst_time, pcb->priority, pcb->arrival_time, pcb->start_time, pcb->finish_time, pcb->wait_time, pcb->start_time-pcb->arrival_time, pcb->finish_time-pcb->arrival_time+1);
+
+				pcb = pcb->next;
+			}
+			fclose(fp);
+		}
+		break;
 	case VK_LEFT:
 		{
 			switch (m_keymode)
@@ -341,7 +394,7 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 					++m_system->cur_time;
 					// 알고리즘을 호출하기 전에, 도착한 PCB가 있으면 ready큐로 옮겨 놓는다.
 					system_switch_work_to_ready(m_system);
-					// 알고리즘을 수행한다.
+					// 알고리즘을 수행한다. ------- 사용자 정의 알고리즘 수행
 					m_algo_item_list[m_system->algorithm].fp_get_next_process(m_system);
 					// 알고리즘을 수행한 후, 후처리를 한다.
 					system_update_after_algorithm(m_system);
@@ -381,8 +434,6 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-
-#define BUFSIZE MAX_PATH
 
 int CChildView::LoadAlgorithmFiles(void)
 {
